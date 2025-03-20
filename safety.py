@@ -1,47 +1,41 @@
 import bcrypt
- 
+
 class Login:
+    employee_logins = ["olga", "alesha", "virus", "sanchez", "sedoy", "darya", 
+                      "gomer", "ganton", "zorich", "timur", "aborigen", 
+                      "valera", "admin", "paplaviy", "shprotos", "holodok", 
+                      "garlik", "molodoy"]  # Все логины маленькими буквами
 
     def __init__(self, name, surname, login):
-        self.name = name # Имя
-        self.surname = surname # Фамилия
-        self.login = login # Логин
+        self.name = name
+        self.surname = surname
+        self.login = login.lower()  # Приводим логин к маленьким буквам
 
     def info(self):
-        print(f"Ваши имя: {self.name}",
-                f"/n ваша фамилия: {self.surname}",
-                f"/n ваш логин: {self.login}")
+        print(f"Имя: {self.name}\nФамилия: {self.surname}\nЛогин: {self.login}")
 
-person1 = Login(1, 2, 3)
-person1.info()
+    def is_employee(self):
+        return self.login in Login.employee_logins
 
-class Autorization:
-
-    def hashing(self, password, hash_algoritm, is_hashed):
+class Authorization(Login):
+    def __init__(self, name, surname, login, password, hash_algorithm="bcrypt"):
+        super().__init__(name, surname, login)
         self.password = password
-        self.hash_algoritm = hash_algoritm
-        self.is_hashed = is_hashed
+        self.hash_algorithm = hash_algorithm
+        self.is_hashed = False
 
     def info(self):
-
-        print(f"Ваш пароль: {self.password}",
-                f"/n алгоритм хэширования: {self.hash_algoritm}",
-                f"/n хэшированный пароль: {self.is_hashed}")
+        if not self.is_hashed:
+            self.hashing_pass()
+        super().info()  # Вызываем info() из родительского класса
+        print(f"Алгоритм хеширования: {self.hash_algorithm}")
+        print(f"Хешированный пароль: {self.password}")
 
     def hashing_pass(self):
- 
-        # Declaring our password
-        password = b'GeekPassword'
-        
-        # Adding the salt to password
-        salt = bcrypt.gensalt()
-        # Hashing the password
-        hashed = bcrypt.hashpw(password, salt)
-        
-        # printing the salt
-        print("Salt :")
-        print(salt)
-        
-        # printing the hashed
-        print("Hashed")
-        print(hashed)
+        if self.hash_algorithm == "bcrypt":
+            password_bytes = self.password.encode("utf-8")
+            salt = bcrypt.gensalt()
+            self.password = bcrypt.hashpw(password_bytes, salt).hex()
+            self.is_hashed = True
+        else:
+            raise ValueError("Алгоритм не поддрерживается")
